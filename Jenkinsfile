@@ -37,25 +37,33 @@ pipeline {
         stage('Cleanup') {
     steps {
         script {
-            // Check if the Docker container exists
-            def containerExists = bat(script: 'docker ps -aq -f name=employee_service', returnStdout: true).trim()
-            
-            // Check if the Docker image exists
-            def imageExists = bat(script: 'docker images -q tapz_employee_img', returnStdout: true).trim()
+            // Define container and image names
+            def containerName = 'employee_service'
+            def imageName = 'tapz_employee_img'
 
-            // If the container exists, stop and remove it
+            // Check if the Docker container exists
+            def containerExists = bat(script: "docker ps -aq -f name=${containerName}", returnStdout: true).trim()
+            
+            // Stop and remove container if it exists
             if (containerExists) {
-                bat 'docker stop employee_service'
-                bat 'docker rm employee_service'
+                echo "Stopping and removing container: ${containerName}..."
+                bat "docker stop ${containerName}"
+                bat "docker rm ${containerName}"
+                echo "Successfully stopped and removed container: ${containerName}."
             } else {
-                echo "Container 'employee_service' does not exist, skipping stop and remove."
+                echo "Container '${containerName}' does not exist. Skipping stop and remove."
             }
 
-            // If the image exists, remove it
+            // Check if the Docker image exists
+            def imageExists = bat(script: "docker images -q ${imageName}", returnStdout: true).trim()
+
+            // Remove image if it exists
             if (imageExists) {
-                bat 'docker rmi tapz_employee_img'
+                echo "Removing image: ${imageName}..."
+                bat "docker rmi ${imageName}"
+                echo "Successfully removed image: ${imageName}."
             } else {
-                echo "Image 'tapz_employee_img' does not exist, skipping removal."
+                echo "Image '${imageName}' does not exist. Skipping removal."
             }
         }
     }
